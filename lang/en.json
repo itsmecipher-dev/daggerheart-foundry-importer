@@ -1,0 +1,19 @@
+{
+  "DAGGERHEART_IMPORTER": {
+    "PasteAdversary": "Paste Adversary",
+    "ImportSuccess": "Imported: {name}",
+    "ImportFailed": "Import failed: {error}",
+    "InvalidJSON": "Clipboard does not contain valid adversary JSON.",
+    "DuplicateFound": "An adversary named \"{name}\" already exists. Import anyway?",
+    "BatchComplete": "Imported {count} adversaries.",
+    "BatchPartial": "Imported {success}/{total} adversaries. {failed} failed.",
+    "ImportEncounterTitle": "Import Encounter",
+    "EncounterName": "Encounter Name",
+    "EncounterNamePlaceholder": "e.g. Ambush at the Bridge",
+    "Adversaries": "Adversaries",
+    "PlaceTokens": "Place tokens on canvas",
+    "CreateEncounter": "Create combat encounter",
+    "NoActiveScene": "(no active scene)",
+    "Import": "Import"
+  }
+}

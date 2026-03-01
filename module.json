@@ -1,0 +1,34 @@
+{
+  "id": "daggerheart-foundry-importer",
+  "title": "Grim Libram Importer",
+  "description": "Import adversaries from the Grim Libram browser extension or clipboard into Foundry VTT.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "systems": [
+    {
+      "id": "daggerheart",
+      "type": "system"
+    }
+  ],
+  "authors": [
+    {
+      "name": "sebas"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/importer.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

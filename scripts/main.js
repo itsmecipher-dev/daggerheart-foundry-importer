@@ -1,0 +1,119 @@
+import { DaggerheartImporterAPI } from "./api.js";
+
+const MODULE_ID = "daggerheart-foundry-importer";
+const MODULE_VERSION = "0.1.0";
+
+let api;
+
+Hooks.once("init", () => {
+  game.settings.register(MODULE_ID, "tokenArtMode", {
+    name: "Token Art Generation (Patreon)",
+    hint: "Generate circular token art for imported adversaries. Requires Patreon connection via the Grim Libram extension.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "missing",
+    choices: { off: "Off", missing: "Missing only", always: "Always (replace defaults)" }
+  });
+
+  game.settings.register(MODULE_ID, "avatarArtMode", {
+    name: "Avatar Art Generation (Patreon)",
+    hint: "Generate avatar/portrait art for imported adversaries. Requires Patreon connection via the Grim Libram extension.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "missing",
+    choices: { off: "Off", missing: "Missing only", always: "Always (replace defaults)" }
+  });
+
+  game.settings.register(MODULE_ID, "tokenStoragePath", {
+    name: "Art Storage Directory",
+    hint: "Directory where generated token and avatar art will be saved.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: `${MODULE_ID}/tokens`,
+    filePicker: "folder"
+  });
+
+  game.settings.register(MODULE_ID, "useCompendiumData", {
+    name: "Use SRD Compendium Data",
+    hint: "When importing an adversary that exists in the system compendium, use the official data instead of parsed data.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  api = new DaggerheartImporterAPI();
+
+  game.daggerheart = game.daggerheart || {};
+  game.daggerheart.importer = api;
+
+  console.log(`${MODULE_ID} v${MODULE_VERSION} | initialized`);
+});
+
+Hooks.once("ready", () => {
+  setupPageMessageListener();
+});
+
+function setupPageMessageListener() {
+  window.addEventListener("message", async (event) => {
+    if (event.source !== window) return;
+    const msg = event.data;
+    if (msg?.source !== "daggerheart-extension") return;
+
+    let result;
+    try {
+      switch (msg.type) {
+        case "PING":
+          result = {
+            ready: true,
+            system: game.system?.id,
+            moduleVersion: MODULE_VERSION
+          };
+          break;
+
+        case "MODULE_STATUS":
+          result = {
+            installed: true,
+            active: true,
+            version: MODULE_VERSION
+          };
+          break;
+
+        case "SET_AUTH":
+          if (msg.data?.token) api.authToken = msg.data.token;
+          result = { success: true };
+          break;
+
+        case "IMPORT_ADVERSARY":
+          if (msg.meta?.auth?.token) api.authToken = msg.meta.auth.token;
+          result = await api.importAdversary(msg.data, msg.meta);
+          break;
+
+        case "IMPORT_ADVERSARIES":
+          if (msg.meta?.auth?.token) api.authToken = msg.meta.auth.token;
+          result = await api.importAdversaries(msg.data, msg.meta);
+          break;
+
+        case "IMPORT_ENCOUNTER":
+          if (msg.meta?.auth?.token) api.authToken = msg.meta.auth.token;
+          result = await api.importEncounter(msg.data, msg.meta);
+          break;
+
+        default:
+          result = { error: `Unknown message type: ${msg.type}` };
+      }
+    } catch (err) {
+      result = { success: false, error: err.message };
+    }
+
+    window.postMessage({
+      source: "daggerheart-page",
+      responseId: msg.id,
+      success: !result.error,
+      data: result
+    }, "*");
+  });
+}
