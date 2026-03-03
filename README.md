@@ -1,4 +1,4 @@
-# Grim Libram Importer
+# Grim Libram for Foundry VTT
 
 A Foundry VTT module for the [Daggerheart](https://darringtonpress.com/daggerheart/) system that imports adversaries from the [Grim Libram](https://grimlibram.com) browser extension.
 
