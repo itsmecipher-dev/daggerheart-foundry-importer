@@ -6,9 +6,20 @@ const MODULE_VERSION = "0.1.0";
 let api;
 
 Hooks.once("init", () => {
+  game.settings.register(MODULE_ID, "useCompendiumData", {
+    name: "Use SRD Compendium Data",
+    hint: "When importing an adversary that exists in the system compendium, use the official data instead of parsed data.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  // --- Patreon-only settings ---
+
   game.settings.register(MODULE_ID, "tokenArtMode", {
-    name: "Token Art Generation (Patreon)",
-    hint: "Generate circular token art for imported adversaries. Requires Patreon connection via the Grim Libram extension.",
+    name: "[Patreon] Token Art Generation",
+    hint: "Generate circular token art for imported adversaries. Requires a Patreon-linked Grim Libram account.",
     scope: "world",
     config: true,
     type: String,
@@ -17,8 +28,8 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, "avatarArtMode", {
-    name: "Avatar Art Generation (Patreon)",
-    hint: "Generate avatar/portrait art for imported adversaries. Requires Patreon connection via the Grim Libram extension.",
+    name: "[Patreon] Avatar Art Generation",
+    hint: "Generate avatar/portrait art for imported adversaries. Requires a Patreon-linked Grim Libram account.",
     scope: "world",
     config: true,
     type: String,
@@ -27,7 +38,7 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, "tokenShowName", {
-    name: "Show Name on Token",
+    name: "[Patreon] Show Name on Token",
     hint: "When enabled, adversary names are rendered on generated tokens. When disabled, tokens without a source image keep the default system token.",
     scope: "world",
     config: true,
@@ -37,7 +48,7 @@ Hooks.once("init", () => {
 
   for (const [tier, defaultBorder] of [[1, "brass"], [2, "copper"], [3, "silver"], [4, "gold"]]) {
     game.settings.register(MODULE_ID, `tokenBorderTier${tier}`, {
-      name: `Tier ${tier} Token Border`,
+      name: `[Patreon] Tier ${tier} Token Border`,
       hint: `Border frame style for tier ${tier} adversary tokens.`,
       scope: "world",
       config: true,
@@ -48,22 +59,13 @@ Hooks.once("init", () => {
   }
 
   game.settings.register(MODULE_ID, "tokenStoragePath", {
-    name: "Art Storage Directory",
+    name: "[Patreon] Art Storage Directory",
     hint: "Directory where generated token and avatar art will be saved.",
     scope: "world",
     config: true,
     type: String,
     default: `${MODULE_ID}/tokens`,
     filePicker: "folder"
-  });
-
-  game.settings.register(MODULE_ID, "useCompendiumData", {
-    name: "Use SRD Compendium Data",
-    hint: "When importing an adversary that exists in the system compendium, use the official data instead of parsed data.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true
   });
 
   api = new DaggerheartImporterAPI();
