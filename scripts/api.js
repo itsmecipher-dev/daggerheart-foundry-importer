@@ -1,7 +1,8 @@
 import { showEncounterDialog } from "./encounter-dialog.js";
 
 const MODULE_ID = "daggerheart-foundry-importer";
-const TOKEN_GENERATOR_URL = "http://localhost:8000";
+const TOKEN_GENERATOR_URL = "https://img.grimlibram.com";
+const DEFAULT_ADVERSARY_SVG = `modules/${MODULE_ID}/assets/default-adversary.svg`;
 
 export class DaggerheartImporterAPI {
   authToken = null;
@@ -169,15 +170,24 @@ export class DaggerheartImporterAPI {
   async #createOrUpdate(cleaned) {
     const existing = game.actors.find(a => a.name === cleaned.name && a.type === "adversary");
     if (existing) {
+      const oldItemIds = existing.items.map(i => i.id);
+      if (oldItemIds.length) await existing.deleteEmbeddedDocuments("Item", oldItemIds);
+      const oldEffectIds = existing.effects.map(e => e.id);
+      if (oldEffectIds.length) await existing.deleteEmbeddedDocuments("ActiveEffect", oldEffectIds);
       await existing.update(cleaned);
       return existing;
     }
     return Actor.create(cleaned);
   }
 
+  #isRemoteUrl(str) {
+    return str?.startsWith("http://") || str?.startsWith("https://");
+  }
+
   #shouldGenerate(currentImg, mode) {
     if (mode === "off") return false;
     if (!currentImg) return true;
+    if (this.#isRemoteUrl(currentImg)) return true;
     if (mode === "always") {
       return currentImg.startsWith("systems/") || currentImg.startsWith("icons/");
     }
@@ -191,10 +201,24 @@ export class DaggerheartImporterAPI {
     const authToken = meta?.auth?.token || this.authToken;
     if (!authToken) return;
 
+    const hasRemoteSrc = this.#isRemoteUrl(cleaned.img);
+    const showName = game.settings.get(MODULE_ID, "tokenShowName");
+    const body = hasRemoteSrc
+      ? { src: cleaned.img }
+      : showName
+        ? { name: cleaned.name }
+        : { src: `${window.location.origin}/${DEFAULT_ADVERSARY_SVG}` };
+
     try {
-      const res = await fetch(`${TOKEN_GENERATOR_URL}/avatar?name=${encodeURIComponent(cleaned.name)}`, {
-        headers: { "Authorization": `Bearer ${authToken}` }
+      const res = await fetch(`${TOKEN_GENERATOR_URL}/avatar`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
       });
+      if (res.status === 403) { cleaned.img = DEFAULT_ADVERSARY_SVG; return; }
       if (!res.ok) return;
 
       const path = await this.#uploadArt(cleaned.name, "avatar", await res.blob());
@@ -211,10 +235,34 @@ export class DaggerheartImporterAPI {
     const authToken = meta?.auth?.token || this.authToken;
     if (!authToken) return;
 
+    const remoteSrc = this.#isRemoteUrl(tokenSrc) ? tokenSrc
+      : this.#isRemoteUrl(cleaned.img) ? cleaned.img : null;
+    const showName = game.settings.get(MODULE_ID, "tokenShowName");
+    const src = remoteSrc
+      || (!showName ? `${window.location.origin}/${DEFAULT_ADVERSARY_SVG}` : null);
+    const tier = cleaned.system?.tier;
+    const border = tier
+      ? game.settings.get(MODULE_ID, `tokenBorderTier${tier}`)
+      : "gold";
+    const body = src
+      ? { src, border }
+      : { name: cleaned.name, border };
+
     try {
-      const res = await fetch(`${TOKEN_GENERATOR_URL}/token?name=${encodeURIComponent(cleaned.name)}`, {
-        headers: { "Authorization": `Bearer ${authToken}` }
+      const res = await fetch(`${TOKEN_GENERATOR_URL}/token`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
       });
+      if (res.status === 403) {
+        cleaned.prototypeToken = cleaned.prototypeToken || {};
+        cleaned.prototypeToken.texture = cleaned.prototypeToken.texture || {};
+        cleaned.prototypeToken.texture.src = DEFAULT_ADVERSARY_SVG;
+        return;
+      }
       if (!res.ok) return;
 
       const path = await this.#uploadArt(cleaned.name, "token", await res.blob());

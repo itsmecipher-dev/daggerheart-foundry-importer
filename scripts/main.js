@@ -26,6 +26,27 @@ Hooks.once("init", () => {
     choices: { off: "Off", missing: "Missing only", always: "Always (replace defaults)" }
   });
 
+  game.settings.register(MODULE_ID, "tokenShowName", {
+    name: "Show Name on Token",
+    hint: "When enabled, adversary names are rendered on generated tokens. When disabled, tokens without a source image keep the default system token.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  for (const [tier, defaultBorder] of [[1, "brass"], [2, "copper"], [3, "silver"], [4, "gold"]]) {
+    game.settings.register(MODULE_ID, `tokenBorderTier${tier}`, {
+      name: `Tier ${tier} Token Border`,
+      hint: `Border frame style for tier ${tier} adversary tokens.`,
+      scope: "world",
+      config: true,
+      type: String,
+      default: defaultBorder,
+      choices: { gold: "Gold", silver: "Silver", brass: "Brass", copper: "Copper" }
+    });
+  }
+
   game.settings.register(MODULE_ID, "tokenStoragePath", {
     name: "Art Storage Directory",
     hint: "Directory where generated token and avatar art will be saved.",
