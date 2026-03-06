@@ -15,11 +15,9 @@ Hooks.once("init", () => {
     default: true
   });
 
-  // --- Patreon-only settings ---
-
   game.settings.register(MODULE_ID, "tokenArtMode", {
-    name: "[Patreon] Token Art Generation",
-    hint: "Generate circular token art for imported adversaries. Requires a Patreon-linked Grim Libram account.",
+    name: "Token Art Generation",
+    hint: "Generate circular token art for imported adversaries.",
     scope: "world",
     config: true,
     type: String,
@@ -28,8 +26,8 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, "avatarArtMode", {
-    name: "[Patreon] Avatar Art Generation",
-    hint: "Generate avatar/portrait art for imported adversaries. Requires a Patreon-linked Grim Libram account.",
+    name: "Avatar Art Generation",
+    hint: "Generate avatar/portrait art for imported adversaries.",
     scope: "world",
     config: true,
     type: String,
@@ -38,7 +36,7 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, "tokenShowName", {
-    name: "[Patreon] Show Name on Token",
+    name: "Show Name on Token",
     hint: "When enabled, adversary names are rendered on generated tokens. When disabled, tokens without a source image keep the default system token.",
     scope: "world",
     config: true,
@@ -48,7 +46,7 @@ Hooks.once("init", () => {
 
   for (const [tier, defaultBorder] of [[1, "brass"], [2, "copper"], [3, "silver"], [4, "gold"]]) {
     game.settings.register(MODULE_ID, `tokenBorderTier${tier}`, {
-      name: `[Patreon] Tier ${tier} Token Border`,
+      name: `Tier ${tier} Token Border`,
       hint: `Border frame style for tier ${tier} adversary tokens.`,
       scope: "world",
       config: true,
@@ -59,13 +57,23 @@ Hooks.once("init", () => {
   }
 
   game.settings.register(MODULE_ID, "tokenStoragePath", {
-    name: "[Patreon] Art Storage Directory",
+    name: "Art Storage Directory",
     hint: "Directory where generated token and avatar art will be saved.",
     scope: "world",
     config: true,
     type: String,
-    default: `${MODULE_ID}/tokens`,
+    default: "",
     filePicker: "folder"
+  });
+
+  Hooks.on("renderSettingsConfig", (app, html) => {
+    if (html.querySelector(".dh-settings-patreon-divider")) return;
+    const firstPatreon = html.querySelector(`[name="${MODULE_ID}.tokenArtMode"]`)?.closest(".form-group");
+    if (!firstPatreon) return;
+    const divider = document.createElement("div");
+    divider.classList.add("dh-settings-patreon-divider");
+    divider.innerHTML = `<hr><p>The following settings require an active <a href="https://www.patreon.com/c/grimlibram_studio/membership" target="_blank">Patreon</a> subscription.</p>`;
+    firstPatreon.parentElement.insertBefore(divider, firstPatreon);
   });
 
   api = new DaggerheartImporterAPI();
@@ -76,8 +84,12 @@ Hooks.once("init", () => {
   console.log(`${MODULE_ID} v${MODULE_VERSION} | initialized`);
 });
 
-Hooks.once("ready", () => {
+Hooks.once("ready", async () => {
   setupPageMessageListener();
+
+  const tour = await foundry.nue.Tour.fromJSON(`modules/${MODULE_ID}/tours/welcome.json`);
+  game.tours.register(MODULE_ID, "welcome", tour);
+  if (tour.status === foundry.nue.Tour.STATUS.UNSTARTED) tour.start();
 });
 
 function setupPageMessageListener() {

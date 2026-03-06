@@ -85,9 +85,7 @@ export class DaggerheartImporterAPI {
       await this.#createCombatEncounter(actorsWithCount, options.encounterName);
     }
 
-    if (failed === 0) {
-      ui.notifications.info(`Imported ${succeeded} adversaries.`);
-    } else {
+    if (failed > 0) {
       ui.notifications.warn(`Imported ${succeeded}/${createdActors.length} adversaries. ${failed} failed.`);
     }
 
@@ -196,6 +194,7 @@ export class DaggerheartImporterAPI {
 
 
   async #generateAvatarArt(cleaned, meta) {
+    if (!game.settings.get(MODULE_ID, "tokenStoragePath")) return;
     const mode = game.settings.get(MODULE_ID, "avatarArtMode");
     if (!this.#shouldGenerate(cleaned.img, mode)) return;
     const authToken = meta?.auth?.token || this.authToken;
@@ -229,6 +228,7 @@ export class DaggerheartImporterAPI {
   }
 
   async #generateTokenArt(cleaned, meta) {
+    if (!game.settings.get(MODULE_ID, "tokenStoragePath")) return;
     const mode = game.settings.get(MODULE_ID, "tokenArtMode");
     const tokenSrc = cleaned.prototypeToken?.texture?.src;
     if (!this.#shouldGenerate(tokenSrc, mode)) return;
@@ -284,7 +284,7 @@ export class DaggerheartImporterAPI {
 
     await foundry.applications.apps.FilePicker.implementation.createDirectory("data", storagePath).catch(() => {});
     const file = new File([blob], filename, { type: "image/webp" });
-    const upload = await foundry.applications.apps.FilePicker.implementation.upload("data", storagePath, file);
+    const upload = await foundry.applications.apps.FilePicker.implementation.upload("data", storagePath, file, {}, { notify: false });
     return upload?.path || null;
   }
 

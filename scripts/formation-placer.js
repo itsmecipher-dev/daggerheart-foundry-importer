@@ -12,6 +12,7 @@ export class FormationPlacer {
   #rotation = 0;
   #spacing = 1.0;
   #currentPosition = { x: 0, y: 0 };
+  #hudPanel = null;
   #createEncounterAfterPlacement = true;
   #encounterName = null;
   #handlers = {};
@@ -45,17 +46,40 @@ export class FormationPlacer {
     this.#rotation = 0;
 
     this.#createPlacementLayer();
-    this.#showFormationInfo();
+    this.#createHudPanel();
+    this.#updateHudPanel();
     this.#setupEventListeners();
   }
 
-  #showFormationInfo() {
+  #createHudPanel() {
+    this.#hudPanel = document.createElement("div");
+    this.#hudPanel.className = "dh-formation-hud";
+    this.#hudPanel.innerHTML = `
+      <div class="dh-formation-hud__title" data-field="formation"></div>
+      <div class="dh-formation-hud__stats">
+        <span><span class="dh-formation-hud__stat-label">Rot</span><span data-field="rotation"></span></span>
+        <span><span class="dh-formation-hud__stat-label">Space</span><span data-field="spacing"></span></span>
+      </div>
+      <div class="dh-formation-hud__controls">
+        <kbd>F</kbd> formation · <kbd>R</kbd> rotate · <kbd>S</kbd> spacing<br>
+        <kbd>Click</kbd> place · <kbd>Esc</kbd> cancel · <kbd>Shift</kbd> reverse
+      </div>`;
+    document.body.appendChild(this.#hudPanel);
+  }
+
+  #updateHudPanel() {
+    if (!this.#hudPanel) return;
     const name = FormationPlacer.FORMATIONS[this.#formationIndex];
-    const pct = Math.round(this.#spacing * 100);
-    ui.notifications.info(
-      `Formation: ${name} | Rotation: ${this.#rotation}° | Spacing: ${pct}% | ` +
-      `F/Shift+F: formation | R/Shift+R: rotate | S/Shift+S: spacing | Click: place | Esc: cancel`
-    );
+    this.#hudPanel.querySelector("[data-field='formation']").textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    this.#hudPanel.querySelector("[data-field='rotation']").textContent = `${this.#rotation}°`;
+    this.#hudPanel.querySelector("[data-field='spacing']").textContent = `${Math.round(this.#spacing * 100)}%`;
+    this.#hudPanel.classList.remove("dh-formation-hud--invalid");
+  }
+
+  #flashHudInvalid() {
+    if (!this.#hudPanel) return;
+    this.#hudPanel.classList.add("dh-formation-hud--invalid");
+    setTimeout(() => this.#hudPanel?.classList.remove("dh-formation-hud--invalid"), 600);
   }
 
   // --- Formation generators ---
@@ -331,7 +355,7 @@ export class FormationPlacer {
     const positions = this.#generateFormation(gridPos.x, gridPos.y, type);
 
     if (!this.#isFormationValid(positions, gridPos.x, gridPos.y)) {
-      ui.notifications.warn("Invalid placement — formation overlaps or out of bounds.");
+      this.#flashHudInvalid();
       return;
     }
 
@@ -341,7 +365,6 @@ export class FormationPlacer {
   #onRightClick() {
     if (!this.#isPlacing) return;
     this.cleanup();
-    ui.notifications.warn("Formation placement cancelled.");
   }
 
   #onKeyPress(event) {
@@ -374,7 +397,6 @@ export class FormationPlacer {
       update = true;
     } else if (key === "Escape") {
       this.cleanup();
-      ui.notifications.warn("Formation placement cancelled.");
       return;
     } else if (key >= "1" && key <= "8") {
       const idx = parseInt(key) - 1;
@@ -385,7 +407,7 @@ export class FormationPlacer {
     }
 
     if (update) {
-      this.#showFormationInfo();
+      this.#updateHudPanel();
       const fakeEvent = { data: { getLocalPosition: () => this.#currentPosition } };
       this.#onMouseMove(fakeEvent);
     }
@@ -424,7 +446,6 @@ export class FormationPlacer {
         await this.#createEncounter(createdTokens);
       }
 
-      ui.notifications.info(`Placed ${createdTokens.length} tokens.`);
       this.cleanup();
     } catch (err) {
       ui.notifications.error(`Failed to create tokens: ${err.message}`);
@@ -459,6 +480,8 @@ export class FormationPlacer {
 
   cleanup() {
     this.#isPlacing = false;
+    this.#hudPanel?.remove();
+    this.#hudPanel = null;
 
     if (this.#handlers.mouseMove) {
       canvas.stage.off("mousemove", this.#handlers.mouseMove);

@@ -1,0 +1,61 @@
+{
+  "title": "DH_IMPORTER.Tour.Title",
+  "description": "DH_IMPORTER.Tour.Description",
+  "canBeResumed": true,
+  "display": true,
+  "restricted": true,
+  "steps": [
+    {
+      "id": "welcome",
+      "selector": "",
+      "title": "DH_IMPORTER.Tour.WelcomeTitle",
+      "content": "DH_IMPORTER.Tour.WelcomeContent"
+    },
+    {
+      "id": "extension",
+      "selector": "",
+      "title": "DH_IMPORTER.Tour.ExtensionTitle",
+      "content": "DH_IMPORTER.Tour.ExtensionContent"
+    },
+    {
+      "id": "connect",
+      "selector": "",
+      "title": "DH_IMPORTER.Tour.ConnectTitle",
+      "content": "DH_IMPORTER.Tour.ConnectContent"
+    },
+    {
+      "id": "sources",
+      "selector": "",
+      "title": "DH_IMPORTER.Tour.SourcesTitle",
+      "content": "DH_IMPORTER.Tour.SourcesContent"
+    },
+    {
+      "id": "settings",
+      "selector": "",
+      "title": "DH_IMPORTER.Tour.SettingsTitle",
+      "content": "DH_IMPORTER.Tour.SettingsContent"
+    },
+    {
+      "id": "patreon",
+      "selector": "",
+      "title": "DH_IMPORTER.Tour.PatreonTitle",
+      "content": "DH_IMPORTER.Tour.PatreonContent"
+    }
+  ],
+  "localization": {
+    "DH_IMPORTER.Tour.Title": "Grim Libram for Foundry VTT",
+    "DH_IMPORTER.Tour.Description": "Learn how to set up the Grim Libram integration for importing Daggerheart adversaries.",
+    "DH_IMPORTER.Tour.WelcomeTitle": "Welcome to Grim Libram",
+    "DH_IMPORTER.Tour.WelcomeContent": "Grim Libram for Foundry VTT lets you import Daggerheart adversaries and encounters directly from supported online sources into your world.\n\nThis short tour will walk you through the setup.",
+    "DH_IMPORTER.Tour.ExtensionTitle": "Install the Browser Extension",
+    "DH_IMPORTER.Tour.ExtensionContent": "To get started, install the <a href='https://chromewebstore.google.com/detail/grim-libram-for-foundry-v/bgegjammeoedehlllpcbbpcjhfgmfiob' target='_blank'>Grim Libram browser extension</a> for Chrome.",
+    "DH_IMPORTER.Tour.ConnectTitle": "Connect to Foundry",
+    "DH_IMPORTER.Tour.ConnectContent": "Once installed, use the extension's pop-up menu to connect to your Foundry tab. A green check-mark icon will appear, confirming the connection is established.",
+    "DH_IMPORTER.Tour.SourcesTitle": "Supported Sources",
+    "DH_IMPORTER.Tour.SourcesContent": "Grim Libram currently supports two sources:\n\n<b><a href='https://compendium.grimlibram.com' target='_blank'>Grim Libram Compendium</a></b> \u2014 browse to any encounter and use the import button to bring it into Foundry.\n\n<b><a href='https://heartofdaggers.com/vault/?cat=adversaries' target='_blank'>Heart of Daggers</a></b> \u2014 open an individual adversary and use the import option in its burger menu (\u2630).",
+    "DH_IMPORTER.Tour.SettingsTitle": "Module Settings",
+    "DH_IMPORTER.Tour.SettingsContent": "You can configure the module under <b>Game Settings \u2192 Module Settings \u2192 Grim Libram for Foundry VTT</b>.\n\nBy default, the module will match imported adversaries against the SRD compendium and use official data when available.\n\nPatreon supporters should also set an <b>Art Storage Directory</b> where generated art will be saved.",
+    "DH_IMPORTER.Tour.PatreonTitle": "Patreon Features",
+    "DH_IMPORTER.Tour.PatreonContent": "<a href='https://www.patreon.com/c/grimlibram_studio/membership' target='_blank'>Patreon</a> supporters get access to automatic token and avatar art generation for imported adversaries, with customizable border styles per adversary tier.\n\nArt generation only runs when an <b>Art Storage Directory</b> is configured in module settings. Without it, imports will skip art generation entirely.\n\nVisit <a href='https://grimlibram.com/vtt' target='_blank'>grimlibram.com/vtt</a> to learn more."
+  }
+}

@@ -24,7 +24,7 @@ jobs:
             module.json > module.tmp && mv module.tmp module.json
 
       - name: Create zip
-        run: zip -r daggerheart-foundry-importer.zip module.json scripts/ styles/ lang/ assets/
+        run: zip -r daggerheart-foundry-importer.zip module.json scripts/ styles/ lang/ assets/ tours/
 
       - name: Create release
         uses: ncipollo/release-action@v1
